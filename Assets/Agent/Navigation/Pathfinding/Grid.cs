@@ -18,7 +18,7 @@ public class Grid : MonoBehaviour
     }
 
     // 2D array of nodes (our grid to pathfind on)
-    Node[,] NodeGrid;
+    PFNode[,] NodeGrid;
 
     float NodeDiameter;
     int GridSizeX, GridSizeY;
@@ -39,7 +39,7 @@ public class Grid : MonoBehaviour
     void CreateGrid()
     {
         // Initialise the grid of nodes with the number of nodes calculated in Start()
-        NodeGrid = new Node[GridSizeX, GridSizeY];
+        NodeGrid = new PFNode[GridSizeX, GridSizeY];
 
         // Calculate the bottom left position of the grid in world space
         Vector3 WorldLeftEdge = Vector3.right * GridWorldSize.x / 2;
@@ -60,14 +60,14 @@ public class Grid : MonoBehaviour
                 bool IsWalkable = !(Physics.CheckSphere(WorldPos, NodeRadius, UnwalkableMask));
 
                 // Create a new node in our grid of nodes using these values
-                NodeGrid[x, y] = new Node(WorldPos, IsWalkable, x, y);
+                NodeGrid[x, y] = new PFNode(WorldPos, IsWalkable, x, y);
             }
         }
     }
 
-    public List<Node> GetNeighboursFromNode(Node node)
+    public List<PFNode> GetNeighboursFromNode(PFNode node)
     {
-        List<Node> Neighbours = new List<Node>();
+        List<PFNode> Neighbours = new List<PFNode>();
 
         // Search in a 3x3 block around the node (diagram below)
         //  -1, -1  0, -1   1, -1
@@ -97,7 +97,7 @@ public class Grid : MonoBehaviour
         return Neighbours;
     }
 
-    public Node GetNodeFromWorldPos(Vector3 _WorldPos)
+    public PFNode GetNodeFromWorldPos(Vector3 _WorldPos)
     {
         // Calculate how far along (by percentage) the passed world position is along the grid of nodes in world space
         float PercentX = (_WorldPos.x + GridWorldSize.x / 2) / GridWorldSize.x;
@@ -125,10 +125,10 @@ public class Grid : MonoBehaviour
         if (NodeGrid != null && DisplayDebugGrid)
         {
             // Draw gizmos for the pathfinding agents
-            Node PlayerNode = GetNodeFromWorldPos(Player.position);
+            PFNode PlayerNode = GetNodeFromWorldPos(Player.position);
 
             // Draw gizmos for each node in the grid of nodes
-            foreach (Node node in NodeGrid)
+            foreach (PFNode node in NodeGrid)
             {
                 // If the node is walkable, draw it in white, otherwise draw it in red
                 Gizmos.color = node.IsWalkable ? Color.white : Color.red;

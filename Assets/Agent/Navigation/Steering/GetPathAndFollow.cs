@@ -13,7 +13,7 @@ public class GetPathAndFollow : MonoBehaviour
     void Start()
     {
         // Send a pathfinding request to the Path Request Manager
-        PathRequestManager.RequestPath(transform.position, Target.position, OnPathFound);
+        //PathRequestManager.RequestPath(transform.position, Target.position, OnPathFound);
     }
 
     public void OnPathFound(Vector3[] NewPath, bool Success)
@@ -24,6 +24,12 @@ public class GetPathAndFollow : MonoBehaviour
             StopCoroutine("FollowPath");
             StartCoroutine("FollowPath");
         }
+    }
+
+    public void RequestPath(Vector3 TargetPos)
+    {
+        // Send a pathfinding request to the Path Request Manager
+        PathRequestManager.RequestPath(transform.position, TargetPos, OnPathFound);
     }
 
     IEnumerator FollowPath()
@@ -39,6 +45,8 @@ public class GetPathAndFollow : MonoBehaviour
                 // The path must be finished, so exit the coroutine
                 if (TargetIndex >= Path.Length)
                 {
+                    TargetIndex = 0;
+                    Path = new Vector3[0];
                     yield break;
                 }
                 CurrentWaypoint = Path[TargetIndex];

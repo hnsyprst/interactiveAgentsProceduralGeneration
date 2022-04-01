@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // To make this item storable on a heap, we must implement the methods required by IHeapItem
-public class Node : IHeapItem<Node>
+public class PFNode : IHeapItem<PFNode>
 {
-    public Node Parent;
+    public PFNode Parent;
     public Vector3 WorldPos;
     public bool IsWalkable;
 
@@ -24,7 +24,7 @@ public class Node : IHeapItem<Node>
 
     int MyHeapIndex;
 
-    public Node(Vector3 _WorldPos, bool _IsWalkable, int _GridX, int _GridY)
+    public PFNode(Vector3 _WorldPos, bool _IsWalkable, int _GridX, int _GridY)
     {
         WorldPos = _WorldPos;
         IsWalkable = _IsWalkable;
@@ -45,7 +45,7 @@ public class Node : IHeapItem<Node>
         }
     }
 
-    public int CompareTo(Node NodeToCompare)
+    public int CompareTo(PFNode NodeToCompare)
     {
         // Compare the FCosts (total costs) of this node and the NodeToCompare
         int Comparison = FCost.CompareTo(NodeToCompare.FCost);

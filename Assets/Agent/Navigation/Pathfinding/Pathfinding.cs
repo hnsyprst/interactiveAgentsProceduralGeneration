@@ -35,22 +35,22 @@ public class Pathfinding : MonoBehaviour
         bool PathfindingSuccess = false;
 
         // Convert world positions to nodes in the grid of nodes
-        Node StartNode = NodeGrid.GetNodeFromWorldPos(StartPos);
-        Node TargetNode = NodeGrid.GetNodeFromWorldPos(TargetPos);
+        PFNode StartNode = NodeGrid.GetNodeFromWorldPos(StartPos);
+        PFNode TargetNode = NodeGrid.GetNodeFromWorldPos(TargetPos);
 
         // Only actually search for a path if both start and target nodes are valid
         if (StartNode.IsWalkable && TargetNode.IsWalkable)
         {
             // Create data structures for storing explorable and explored nodes
-            Heap<Node> Frontier = new Heap<Node>(NodeGrid.MaxSize);
-            HashSet<Node> Explored = new HashSet<Node>();
+            Heap<PFNode> Frontier = new Heap<PFNode>(NodeGrid.MaxSize);
+            HashSet<PFNode> Explored = new HashSet<PFNode>();
 
             Frontier.Add(StartNode);
 
             // Expand nodes in the Frontier while there are still nodes to expand
             while (Frontier.Count > 0)
             {
-                Node CurrentNode = Frontier.Pop();
+                PFNode CurrentNode = Frontier.Pop();
                 Explored.Add(CurrentNode);
 
                 // If the current node is the target node, we have arrived! Exit the loop
@@ -61,7 +61,7 @@ public class Pathfinding : MonoBehaviour
                 }
 
                 // Expand the current node's neighbours
-                foreach (Node neighbour in NodeGrid.GetNeighboursFromNode(CurrentNode))
+                foreach (PFNode neighbour in NodeGrid.GetNeighboursFromNode(CurrentNode))
                 {
                     // If this neighbour is not walkable, or has already been explored, ignore this neighbour
                     if (!neighbour.IsWalkable || Explored.Contains(neighbour))
@@ -101,23 +101,26 @@ public class Pathfinding : MonoBehaviour
         RequestManager.FinishedProcessingPath(Waypoints, PathfindingSuccess);
     }
 
-    Vector3[] ReconstructPath(Node _StartNode, Node _TargetNode)
+    Vector3[] ReconstructPath(PFNode _StartNode, PFNode _TargetNode)
     {
-        List<Node> Path = new List<Node>();
+        List<PFNode> Path = new List<PFNode>();
         // We trace the path backwards so that we can access Nodes' Parent properties
-        Node CurrentNode = _TargetNode;
+        PFNode CurrentNode = _TargetNode;
 
         while (CurrentNode != _StartNode)
         {
             Path.Add(CurrentNode);
             CurrentNode = CurrentNode.Parent;
         }
+
+        Path.Add(CurrentNode);
+
         Vector3[] Waypoints = SimplifyPath(Path);
         Array.Reverse(Waypoints);
         return Waypoints;
     }
 
-    Vector3[] SimplifyPath(List<Node> Path)
+    Vector3[] SimplifyPath(List<PFNode> Path)
     {
         List<Vector3> Waypoints = new List<Vector3>();
         Vector2 DirectionOld = Vector2.zero;
@@ -141,7 +144,7 @@ public class Pathfinding : MonoBehaviour
     // This means that the horizontal or vertical distance between any 2 neighbouring nodes is 10
     // We can therefore calculate the diagonal distance using Pythagoras' theorem:
     // Diagonal distance = sqrt(10^2 + 10^2) = approximately 14
-    int GetDistance(Node NodeA, Node NodeB)
+    int GetDistance(PFNode NodeA, PFNode NodeB)
     {
         // Get the distance JUST along the X axis between NodeA and NodeB
         int DistanceX = Mathf.Abs(NodeA.GridX - NodeB.GridX);
