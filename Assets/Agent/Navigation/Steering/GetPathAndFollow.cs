@@ -29,7 +29,6 @@ public class GetPathAndFollow : MonoBehaviour
             StopCoroutine("FollowPath");
             TargetIndex = 0;
             Path = new Vector3[0];
-            IsFollowingPath = false;
 
             // Apply the new path
             Path = NewPath;
@@ -48,11 +47,10 @@ public class GetPathAndFollow : MonoBehaviour
     IEnumerator FollowPath()
     {
         Vector3 CurrentWaypoint = Path[0];
+        IsFollowingPath = true;
 
         while (true)
         {
-            IsFollowingPath = true;
-
             if (transform.position == CurrentWaypoint)
             {
                 TargetIndex++;

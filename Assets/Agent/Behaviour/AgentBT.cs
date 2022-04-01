@@ -31,6 +31,8 @@ public class AgentBT : MonoBehaviour
     int CurrentAction;
     public List<float> UtilityScores;
 
+    bool IsFollowingPath;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -57,7 +59,9 @@ public class AgentBT : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //UpdateBlackboard();
         UpdateScores();
+        IsFollowingPath = AgentPathfinding.IsFollowingPath;
         float maxValue = UtilityScores.Max(t => t);
         int maxIndex = UtilityScores.IndexOf(maxValue);
 
@@ -140,17 +144,40 @@ public class AgentBT : MonoBehaviour
     {
         /*return new Root(new Sequence(
                         new Action(() => NavigateTo(Water.position)),
-                        new Wait(60.0f)));*/
+                        new WaitUntilStopped()));*/
 
         return new Root(new Sequence(
                         new Action(() => NavigateTo(Water.position)),
+                        new Wait(1f),
+                        new WaitForCondition(() => !IsFollowingPath,
+                        new Sequence(
+                            new Action(() => Debug.Log("Arrived")),
+                            new Wait(0.5f),
+                            new Action(() => CurrentAgentStatus.Drink(4.5f)))),
                         new WaitUntilStopped()));
     }
 
     Root SeekFood()
     {
+        /*return new Root(new Sequence(
+                       new Action(() => NavigateTo(Food.position)),
+                       new Wait(1f),
+                       new Condition(() => !AgentPathfinding.IsFollowingPath,
+                           new Sequence(
+                               new Action(() => Debug.Log("Arrived")),
+                               new Wait(0.5f),
+                               new Action(() => CurrentAgentStatus.Eat(4.5f)),
+                               new WaitUntilStopped())),
+                       new WaitUntilStopped()));*/
+
         return new Root(new Sequence(
                         new Action(() => NavigateTo(Food.position)),
+                        new Wait(1f),
+                        new WaitForCondition(() => !IsFollowingPath,
+                        new Sequence(
+                            new Action(() => Debug.Log("Arrived")),
+                            new Wait(0.5f),
+                            new Action(() => CurrentAgentStatus.Eat(4.5f)))),
                         new WaitUntilStopped()));
     }
 
