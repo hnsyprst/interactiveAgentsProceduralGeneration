@@ -10,18 +10,31 @@ public class GetPathAndFollow : MonoBehaviour
     Vector3[] Path;
     int TargetIndex;
 
+    public bool IsFollowingPath;
+
     void Start()
     {
         // Send a pathfinding request to the Path Request Manager
         //PathRequestManager.RequestPath(transform.position, Target.position, OnPathFound);
+
+        IsFollowingPath = false;
     }
 
     public void OnPathFound(Vector3[] NewPath, bool Success)
     {
         if (Success)
         {
-            Path = NewPath;
+            // Stop the coroutine and zero out the path
+            // This stops agents from behaving strangely when their path suddenly changes
             StopCoroutine("FollowPath");
+            TargetIndex = 0;
+            Path = new Vector3[0];
+            IsFollowingPath = false;
+
+            // Apply the new path
+            Path = NewPath;
+
+            // Start following the new path
             StartCoroutine("FollowPath");
         }
     }
@@ -38,6 +51,8 @@ public class GetPathAndFollow : MonoBehaviour
 
         while (true)
         {
+            IsFollowingPath = true;
+
             if (transform.position == CurrentWaypoint)
             {
                 TargetIndex++;
@@ -45,8 +60,10 @@ public class GetPathAndFollow : MonoBehaviour
                 // The path must be finished, so exit the coroutine
                 if (TargetIndex >= Path.Length)
                 {
+                    // Reset path following variables, ready for the next path
                     TargetIndex = 0;
                     Path = new Vector3[0];
+                    IsFollowingPath = false;
                     yield break;
                 }
                 CurrentWaypoint = Path[TargetIndex];

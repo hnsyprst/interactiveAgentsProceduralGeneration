@@ -9,6 +9,9 @@ public class AgentBT : MonoBehaviour
     // Reference to agent's path request and following script
     public GetPathAndFollow AgentPathfinding;
 
+    // Reference to agent's status (hunger, thirst)
+    public AgentStatus CurrentAgentStatus;
+
     // References to interactable objects in the world
     public Transform Water;
     public Transform Food;
@@ -26,12 +29,13 @@ public class AgentBT : MonoBehaviour
     const int AGENT_CHOP_WOOD = 3;
 
     int CurrentAction;
-    List<int> UtilityScores;
+    public List<float> UtilityScores;
 
     // Start is called before the first frame update
     void Start()
     {
         AgentPathfinding = GetComponent<GetPathAndFollow>();
+        CurrentAgentStatus = GetComponent<AgentStatus>();
 
         // Get interaction locations for interactable objects
         Water = Water.Find("InteractionTarget");
@@ -43,7 +47,7 @@ public class AgentBT : MonoBehaviour
         SwitchTree(SelectBehaviourTree(CurrentAction));
 
         // Set utility scores to zero
-        UtilityScores = new List<int>();
+        UtilityScores = new List<float>();
         UtilityScores.Add(0); // AGENT_IDLE
         UtilityScores.Add(0); // AGENT_SEEK_WATER
         UtilityScores.Add(0); // AGENT_SEEK_FOOD
@@ -54,7 +58,7 @@ public class AgentBT : MonoBehaviour
     void Update()
     {
         UpdateScores();
-        int maxValue = UtilityScores.Max(t => t);
+        float maxValue = UtilityScores.Max(t => t);
         int maxIndex = UtilityScores.IndexOf(maxValue);
 
         if (CurrentAction != maxIndex)
@@ -66,10 +70,10 @@ public class AgentBT : MonoBehaviour
 
     void UpdateScores()
     {
-        UtilityScores[AGENT_IDLE] = 10;
-        UtilityScores[AGENT_SEEK_WATER] = 15;
-        UtilityScores[AGENT_SEEK_FOOD] = 5;
-        UtilityScores[AGENT_CHOP_WOOD] = 5;
+        UtilityScores[AGENT_IDLE] = 0;
+        UtilityScores[AGENT_SEEK_WATER] = CurrentAgentStatus.Thirst;
+        UtilityScores[AGENT_SEEK_FOOD] = CurrentAgentStatus.Hunger;
+        UtilityScores[AGENT_CHOP_WOOD] = 0;
     }
 
     void SwitchTree(Root _bt_Tree)
@@ -140,16 +144,20 @@ public class AgentBT : MonoBehaviour
 
         return new Root(new Sequence(
                         new Action(() => NavigateTo(Water.position)),
-                        new Wait(60.0f)));
+                        new WaitUntilStopped()));
     }
 
     Root SeekFood()
     {
-        return new Root(new Action(() => NavigateTo(Food.position)));
+        return new Root(new Sequence(
+                        new Action(() => NavigateTo(Food.position)),
+                        new WaitUntilStopped()));
     }
 
     Root ChopWood()
     {
-        return new Root(new Action(() => NavigateTo(Wood.position)));
+        return new Root(new Sequence(
+                        new Action(() => NavigateTo(Wood.position)),
+                        new WaitUntilStopped()));
     }
 }
