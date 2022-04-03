@@ -12,6 +12,9 @@ public class AgentBT : MonoBehaviour
     // Reference to agent's status (hunger, thirst)
     public AgentStatus CurrentAgentStatus;
 
+    // Reference to agent's communication script
+    public AgentCommunicate CurrentAgentCommunicate;
+
     // References to interactable objects in the world
     public Transform Water;
     public Transform Food;
@@ -38,9 +41,10 @@ public class AgentBT : MonoBehaviour
     {
         AgentPathfinding = GetComponent<GetPathAndFollow>();
         CurrentAgentStatus = GetComponent<AgentStatus>();
+        CurrentAgentCommunicate = GetComponentInChildren<AgentCommunicate>();
 
-        // Get interaction locations for interactable objects
-        Water = Water.Find("InteractionTarget");
+    // Get interaction locations for interactable objects
+    Water = Water.Find("InteractionTarget");
         Food = Food.transform.Find("InteractionTarget");
         Wood = Wood.transform.Find("InteractionTarget");
 
@@ -142,16 +146,13 @@ public class AgentBT : MonoBehaviour
 
     Root SeekWater()
     {
-        /*return new Root(new Sequence(
-                        new Action(() => NavigateTo(Water.position)),
-                        new WaitUntilStopped()));*/
-
         return new Root(new Sequence(
                         new Action(() => NavigateTo(Water.position)),
+                        new Action(() => CurrentAgentCommunicate.UIBark("Water")),
                         new Wait(1f),
                         new WaitForCondition(() => !IsFollowingPath,
                         new Sequence(
-                            new Action(() => Debug.Log("Arrived")),
+                            new Action(() => CurrentAgentCommunicate.UIBarkStop()),
                             new Wait(0.5f),
                             new Action(() => CurrentAgentStatus.Drink(4.5f)))),
                         new WaitUntilStopped()));
@@ -159,23 +160,13 @@ public class AgentBT : MonoBehaviour
 
     Root SeekFood()
     {
-        /*return new Root(new Sequence(
-                       new Action(() => NavigateTo(Food.position)),
-                       new Wait(1f),
-                       new Condition(() => !AgentPathfinding.IsFollowingPath,
-                           new Sequence(
-                               new Action(() => Debug.Log("Arrived")),
-                               new Wait(0.5f),
-                               new Action(() => CurrentAgentStatus.Eat(4.5f)),
-                               new WaitUntilStopped())),
-                       new WaitUntilStopped()));*/
-
         return new Root(new Sequence(
                         new Action(() => NavigateTo(Food.position)),
+                        new Action(() => CurrentAgentCommunicate.UIBark("Food")),
                         new Wait(1f),
                         new WaitForCondition(() => !IsFollowingPath,
                         new Sequence(
-                            new Action(() => Debug.Log("Arrived")),
+                            new Action(() => CurrentAgentCommunicate.UIBarkStop()),
                             new Wait(0.5f),
                             new Action(() => CurrentAgentStatus.Eat(4.5f)))),
                         new WaitUntilStopped()));
@@ -185,6 +176,13 @@ public class AgentBT : MonoBehaviour
     {
         return new Root(new Sequence(
                         new Action(() => NavigateTo(Wood.position)),
+                        new Action(() => CurrentAgentCommunicate.UIBark("Wood")),
+                        new Wait(1f),
+                        new WaitForCondition(() => !IsFollowingPath,
+                        new Sequence(
+                            new Action(() => CurrentAgentCommunicate.UIBarkStop()),
+                            new Wait(0.5f),
+                            new Action(() => CurrentAgentStatus.Eat(4.5f)))),
                         new WaitUntilStopped()));
     }
 }
