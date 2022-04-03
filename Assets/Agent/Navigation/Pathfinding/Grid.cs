@@ -130,14 +130,19 @@ public class Grid : MonoBehaviour
             // Draw gizmos for each node in the grid of nodes
             foreach (PFNode node in NodeGrid)
             {
+                Color DrawColor = new Color();
                 // If the node is walkable, draw it in white, otherwise draw it in red
-                Gizmos.color = node.IsWalkable ? Color.white : Color.red;
+                DrawColor = node.IsWalkable ? Color.white : Color.red;
                 // If the node is where a pathfinding agent is standing, draw it in blue
-                if (node == PlayerNode) Gizmos.color = Color.blue;
+                if (node == PlayerNode) DrawColor = Color.blue;
+
+                DrawColor.a = 0.5f;
+                Gizmos.color = DrawColor;
 
                 // We want to draw our grid as (almost) squares, not cubes
                 Vector3 onezeroone = new Vector3(1, 0.01f, 1);
-                Gizmos.DrawCube(node.WorldPos, onezeroone * (NodeDiameter - 0.1f));
+                Vector3 UpwardTranslation = new Vector3(0, 0.2f, 0);
+                Gizmos.DrawCube(node.WorldPos + UpwardTranslation, onezeroone * (NodeDiameter - 0.1f));
             }
         }
     }

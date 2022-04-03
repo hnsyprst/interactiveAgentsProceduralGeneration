@@ -142,7 +142,7 @@ public class Pathfinding : MonoBehaviour
     // This means that the horizontal or vertical distance between any 2 neighbouring nodes is 10
     // We can therefore calculate the diagonal distance using Pythagoras' theorem:
     // Diagonal distance = sqrt(10^2 + 10^2) = approximately 14
-    int GetDistance(PFNode NodeA, PFNode NodeB)
+    public int GetDistance(PFNode NodeA, PFNode NodeB)
     {
         // Get the distance JUST along the X axis between NodeA and NodeB
         int DistanceX = Mathf.Abs(NodeA.GridX - NodeB.GridX);
@@ -167,5 +167,13 @@ public class Pathfinding : MonoBehaviour
             // of the Y distance along the Y axis
             return 14 * DistanceX + 10 * (DistanceY - DistanceX);
         }
+    }
+
+    public int GetDistance(Vector3 StartPos, Vector3 TargetPos)
+    {
+        PFNode NodeA = NodeGrid.GetNodeFromWorldPos(StartPos);
+        PFNode NodeB = NodeGrid.GetNodeFromWorldPos(TargetPos);
+
+        return GetDistance(NodeA, NodeB);
     }
 }

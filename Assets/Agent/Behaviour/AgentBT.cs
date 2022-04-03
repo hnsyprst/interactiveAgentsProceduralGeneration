@@ -8,6 +8,7 @@ public class AgentBT : MonoBehaviour
 {
     // Reference to agent's path request and following script
     public GetPathAndFollow AgentPathfinding;
+    public Steer AgentSteering;
 
     // Reference to agent's status (hunger, thirst)
     public AgentStatus CurrentAgentStatus;
@@ -15,20 +16,19 @@ public class AgentBT : MonoBehaviour
     // Reference to agent's communication script
     public AgentCommunicate CurrentAgentCommunicate;
 
-    // References to interactable objects in the world
-    public Transform Water;
-    public Transform Food;
-    public Transform Wood;
+    // Reference to agent's perception script
+    public AgentPerception CurrentAgentPerception;
 
-    public Transform EasyTarget;
+    // References to lists of interactable objects in the world
+    HashSet<Vector3> FoodLocations, WaterLocations, WoodLocations;
 
     Root bt_Tree;
     Blackboard bt_Blackboard;
 
     // List of behaviour trees
     const int AGENT_IDLE = 0;
-    const int AGENT_SEEK_WATER = 1;
-    const int AGENT_SEEK_FOOD = 2;
+    const int AGENT_DRINK = 1;
+    const int AGENT_EAT = 2;
     const int AGENT_CHOP_WOOD = 3;
 
     int CurrentAction;
@@ -40,13 +40,10 @@ public class AgentBT : MonoBehaviour
     void Start()
     {
         AgentPathfinding = GetComponent<GetPathAndFollow>();
+        AgentSteering = GetComponent<Steer>();
         CurrentAgentStatus = GetComponent<AgentStatus>();
         CurrentAgentCommunicate = GetComponentInChildren<AgentCommunicate>();
-
-    // Get interaction locations for interactable objects
-    Water = Water.Find("InteractionTarget");
-        Food = Food.transform.Find("InteractionTarget");
-        Wood = Wood.transform.Find("InteractionTarget");
+        CurrentAgentPerception = GetComponentInChildren<AgentPerception>();
 
         // Set initial action
         CurrentAction = AGENT_IDLE;
@@ -55,15 +52,15 @@ public class AgentBT : MonoBehaviour
         // Set utility scores to zero
         UtilityScores = new List<float>();
         UtilityScores.Add(0); // AGENT_IDLE
-        UtilityScores.Add(0); // AGENT_SEEK_WATER
-        UtilityScores.Add(0); // AGENT_SEEK_FOOD
+        UtilityScores.Add(0); // AGENT_DRINK
+        UtilityScores.Add(0); // AGENT_EAT
         UtilityScores.Add(0); // AGENT_CHOP_WOOD
     }
 
     // Update is called once per frame
     void Update()
     {
-        //UpdateBlackboard();
+        UpdatePerception();
         UpdateScores();
         IsFollowingPath = AgentPathfinding.IsFollowingPath;
         float maxValue = UtilityScores.Max(t => t);
@@ -79,9 +76,39 @@ public class AgentBT : MonoBehaviour
     void UpdateScores()
     {
         UtilityScores[AGENT_IDLE] = 0;
-        UtilityScores[AGENT_SEEK_WATER] = CurrentAgentStatus.Thirst;
-        UtilityScores[AGENT_SEEK_FOOD] = CurrentAgentStatus.Hunger;
+        UtilityScores[AGENT_DRINK] = CurrentAgentStatus.Thirst;
+        UtilityScores[AGENT_EAT] = CurrentAgentStatus.Hunger;
         UtilityScores[AGENT_CHOP_WOOD] = 0;
+    }
+
+    void UpdatePerception()
+    {
+        FoodLocations = CurrentAgentPerception.FoodLocations;
+        WaterLocations = CurrentAgentPerception.WaterLocations;
+        WoodLocations = CurrentAgentPerception.WoodLocations;
+    }
+
+    Vector3 GetClosest(HashSet<Vector3> ResourceLocations)
+    {
+        Vector3 ClosestPosition = Vector3.zero;
+        // Start out with 'infinite' distance
+        int Distance = 2147483647;
+
+        // For each position of this resource that the agent knows about
+        foreach (Vector3 position in ResourceLocations)
+        {
+            // Use the Pathfinding script's GetDistance function to calculate the distance 
+            // from the agent's current position to the resource position
+            int NewDistance = PathRequestManager.pathfinding.GetDistance(transform.position, position);
+            // If that distance is lower than the lowest distance found so far, set ClosestPosition
+            // to the current resource position
+            if (NewDistance < Distance)
+            {
+                ClosestPosition = position;
+            }
+        }
+
+        return ClosestPosition;
     }
 
     void SwitchTree(Root _bt_Tree)
@@ -92,7 +119,12 @@ public class AgentBT : MonoBehaviour
         // Load the new tree
         bt_Tree = _bt_Tree;
         bt_Blackboard = bt_Tree.Blackboard;
-        
+
+        #if UNITY_EDITOR
+        Debugger debugger = (Debugger)this.gameObject.AddComponent((typeof(Debugger)));
+        debugger.BehaviorTree = bt_Tree;
+        #endif
+
         bt_Tree.Start();
     }
 
@@ -103,14 +135,14 @@ public class AgentBT : MonoBehaviour
             case AGENT_IDLE:
                 return Idle();
 
-            case AGENT_SEEK_WATER:
+            case AGENT_DRINK:
                 return SeekWater();
 
-            case AGENT_SEEK_FOOD:
+            case AGENT_EAT:
                 return SeekFood();
 
             case AGENT_CHOP_WOOD:
-                return ChopWood();
+                return GoToWoodAndChop();
 
             default:
                 return Idle();
@@ -133,6 +165,11 @@ public class AgentBT : MonoBehaviour
         // Complete once steering is finished
     }
 
+    bool JustReturnFalse()
+    {
+        return false;
+    }
+
     /*********************************************
      * 
      * BEHAVIOUR TREES
@@ -144,45 +181,83 @@ public class AgentBT : MonoBehaviour
         return new Root(new Action(() => Wander()));
     }
 
+    // If agent knows the location of a water source, go to it and drink
+    // Otherwise wander until the agent finds it
     Root SeekWater()
     {
-        return new Root(new Sequence(
-                        new Action(() => NavigateTo(Water.position)),
-                        new Action(() => CurrentAgentCommunicate.UIBark("Water")),
-                        new Wait(1f),
-                        new WaitForCondition(() => !IsFollowingPath,
+        return new Root(new Selector(
+                        new Condition(() => WaterLocations.Count > 0, Stops.IMMEDIATE_RESTART,
+                        GoToWaterAndDrink()),
+                        WanderForWater()));
+    }
+
+    Node WanderForWater()
+    {
+        return new Sequence(
+                    new Action(() => CurrentAgentCommunicate.UIBark("Water", "Where")),
+                    new Action(() => Wander()));
+    }
+
+    Node GoToWaterAndDrink()
+    {
+        return new Sequence(
+                    new Action(() => Debug.Log("Navigating to water")),
+                    new Action(() => NavigateTo(GetClosest(WaterLocations))),
+                        //new Action(() => Debug.Log(GetClosest(WaterLocations))),
+                    new Action(() => CurrentAgentCommunicate.UIBark("Water")),
+                    new Wait(1f),
+                    new WaitForCondition(() => !IsFollowingPath,
                         new Sequence(
                             new Action(() => CurrentAgentCommunicate.UIBarkStop()),
                             new Wait(0.5f),
                             new Action(() => CurrentAgentStatus.Drink(4.5f)))),
-                        new WaitUntilStopped()));
+                    new WaitUntilStopped());
     }
 
+    // If agent knows the location of a food source, go to it and eat
+    // Otherwise wander until the agent finds it
     Root SeekFood()
     {
-        return new Root(new Sequence(
-                        new Action(() => NavigateTo(Food.position)),
-                        new Action(() => CurrentAgentCommunicate.UIBark("Food")),
-                        new Wait(1f),
-                        new WaitForCondition(() => !IsFollowingPath,
+        return new Root(new Selector(
+                        new Condition(() => FoodLocations.Count > 0, Stops.IMMEDIATE_RESTART,
+                        GoToWaterAndDrink()),
+                        WanderForWater()));
+    }
+
+    Node WanderForFood()
+    {
+        return new Sequence(
+                    new Action(() => CurrentAgentCommunicate.UIBark("Food", "Where")),
+                    new Action(() => Wander()));
+    }
+
+    Node GoToFoodAndEat()
+    {
+        return new Sequence(
+                    new Action(() => NavigateTo(GetClosest(FoodLocations))),
+                    //new Action(() => Debug.Log(GetClosest(FoodLocations))),
+                    new Action(() => CurrentAgentCommunicate.UIBark("Food")),
+                    new Wait(1f),
+                    new WaitForCondition(() => !IsFollowingPath,
                         new Sequence(
                             new Action(() => CurrentAgentCommunicate.UIBarkStop()),
                             new Wait(0.5f),
                             new Action(() => CurrentAgentStatus.Eat(4.5f)))),
-                        new WaitUntilStopped()));
+                    new WaitUntilStopped());
     }
 
-    Root ChopWood()
+    Root GoToWoodAndChop()
     {
         return new Root(new Sequence(
-                        new Action(() => NavigateTo(Wood.position)),
+                        new Action(() => NavigateTo(GetClosest(WoodLocations))),
+                        new Action(() => Debug.Log(GetClosest(WoodLocations))),
                         new Action(() => CurrentAgentCommunicate.UIBark("Wood")),
                         new Wait(1f),
                         new WaitForCondition(() => !IsFollowingPath,
-                        new Sequence(
-                            new Action(() => CurrentAgentCommunicate.UIBarkStop()),
-                            new Wait(0.5f),
-                            new Action(() => CurrentAgentStatus.Eat(4.5f)))),
+                            new Sequence(
+                                new Action(() => CurrentAgentCommunicate.UIBarkStop()),
+                                new Wait(0.5f),
+                                new Action(() => CurrentAgentStatus.Eat(4.5f)))),
                         new WaitUntilStopped()));
     }
 }

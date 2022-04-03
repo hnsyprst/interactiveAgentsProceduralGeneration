@@ -11,7 +11,7 @@ public class PathRequestManager : MonoBehaviour
 
     // We only ever need one PathRequestManager
     static PathRequestManager instance;
-    Pathfinding pathfinding;
+    public static Pathfinding pathfinding;
     bool IsProcessingPath;
 
     // Data structure for storing the details of pathfinding requests

@@ -19,10 +19,21 @@ public class AgentCommunicate : MonoBehaviour
         
     }
 
-    public void UIBark(string BarkName)
+    /*public void UIBark(string BarkName)
     {
         int Emoji = Barks.BarkDict[BarkName];
         BarkTextMesh.text = "<sprite=" + Emoji + ">";
+    }*/
+
+    public void UIBark(params string[] BarkName)
+    {
+        string OutputText = "";
+        foreach (string bark in BarkName)
+        {
+            int Emoji = Barks.BarkDict[bark];
+            OutputText += "<sprite=" + Emoji + ">";
+        }
+        BarkTextMesh.text = OutputText;
     }
 
     public void UIBarkStop()
