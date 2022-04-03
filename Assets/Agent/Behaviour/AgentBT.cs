@@ -160,9 +160,14 @@ public class AgentBT : MonoBehaviour
         AgentPathfinding.RequestPath(TargetPos);
     }
 
-    void Wander()
+    void StartWander()
     {
-        // Complete once steering is finished
+        AgentSteering.SetWander = true;
+    }
+
+    void StopWander()
+    {
+        AgentSteering.SetWander = false;
     }
 
     bool JustReturnFalse()
@@ -178,7 +183,7 @@ public class AgentBT : MonoBehaviour
 
     Root Idle()
     {
-        return new Root(new Action(() => Wander()));
+        return new Root(new Action(() => StartWander()));
     }
 
     // If agent knows the location of a water source, go to it and drink
@@ -195,15 +200,16 @@ public class AgentBT : MonoBehaviour
     {
         return new Sequence(
                     new Action(() => CurrentAgentCommunicate.UIBark("Water", "Where")),
-                    new Action(() => Wander()));
+                    new Action(() => StartWander()));
     }
 
     Node GoToWaterAndDrink()
     {
         return new Sequence(
+                    new Action(() => StopWander()),
                     new Action(() => Debug.Log("Navigating to water")),
                     new Action(() => NavigateTo(GetClosest(WaterLocations))),
-                        //new Action(() => Debug.Log(GetClosest(WaterLocations))),
+                    new Action(() => Debug.Log(GetClosest(WaterLocations))),
                     new Action(() => CurrentAgentCommunicate.UIBark("Water")),
                     new Wait(1f),
                     new WaitForCondition(() => !IsFollowingPath,
@@ -220,20 +226,21 @@ public class AgentBT : MonoBehaviour
     {
         return new Root(new Selector(
                         new Condition(() => FoodLocations.Count > 0, Stops.IMMEDIATE_RESTART,
-                        GoToWaterAndDrink()),
-                        WanderForWater()));
+                        GoToFoodAndEat()),
+                        WanderForFood()));
     }
 
     Node WanderForFood()
     {
         return new Sequence(
                     new Action(() => CurrentAgentCommunicate.UIBark("Food", "Where")),
-                    new Action(() => Wander()));
+                    new Action(() => StartWander()));
     }
 
     Node GoToFoodAndEat()
     {
         return new Sequence(
+                    new Action(() => StopWander()),
                     new Action(() => NavigateTo(GetClosest(FoodLocations))),
                     //new Action(() => Debug.Log(GetClosest(FoodLocations))),
                     new Action(() => CurrentAgentCommunicate.UIBark("Food")),
@@ -249,6 +256,7 @@ public class AgentBT : MonoBehaviour
     Root GoToWoodAndChop()
     {
         return new Root(new Sequence(
+                        new Action(() => StopWander()),
                         new Action(() => NavigateTo(GetClosest(WoodLocations))),
                         new Action(() => Debug.Log(GetClosest(WoodLocations))),
                         new Action(() => CurrentAgentCommunicate.UIBark("Wood")),

@@ -6,7 +6,8 @@ public class Steer : MonoBehaviour
 {
     public bool SetWander = false;
     public Wander WanderScript;
-    public float MovementSpeed = 2f;
+    public float MovementSpeed = 0.1f;
+    public float MaximumForce = 2f;
 
     Vector3 Velocity;
     Vector3 WanderForce;
@@ -27,8 +28,19 @@ public class Steer : MonoBehaviour
         {
             WanderForce = WanderScript.GetWanderForce(Velocity);
         }
+        else
+        {
+            Velocity = Vector3.zero;
+            WanderForce = Vector3.zero;
+        }
+
+        Vector3 DesiredVelocity = WanderForce.normalized * MovementSpeed;
+        Vector3 SteeringForce = DesiredVelocity - Velocity;
+        SteeringForce = Vector3.ClampMagnitude(SteeringForce, MaximumForce);
+
+        Velocity = Vector3.ClampMagnitude(Velocity + WanderForce, MaximumForce);
 
         // Actually steer towards the next waypoint
-        transform.position += Velocity * MovementSpeed;
+        transform.position += Velocity * Time.deltaTime;
     }
 }
