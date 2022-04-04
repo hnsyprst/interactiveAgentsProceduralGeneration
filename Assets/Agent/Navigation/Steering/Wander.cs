@@ -10,7 +10,7 @@ public class Wander : MonoBehaviour
     public Vector3 GetWanderForce(Vector3 CurrentVelocity)
     {
         Vector3 CircleCentre = CurrentVelocity.normalized;
-        Vector2 RandomCirclePoint = Random.insideUnitCircle;
+        Vector2 RandomCirclePoint = Random.insideUnitCircle.normalized;
 
         Vector3 Displacement = new Vector3(RandomCirclePoint.x, 0, RandomCirclePoint.y);
         Displacement *= CircleRadius;

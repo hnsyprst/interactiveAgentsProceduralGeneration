@@ -42,5 +42,6 @@ public class Steer : MonoBehaviour
 
         // Actually steer towards the next waypoint
         transform.position += Velocity * Time.deltaTime;
+        transform.forward = Velocity.normalized;
     }
 }

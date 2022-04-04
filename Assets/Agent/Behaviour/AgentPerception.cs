@@ -9,6 +9,8 @@ public class AgentPerception : MonoBehaviour
     public LayerMask ResourceTileLayer;
     public float MaxPerceptionDistance;
 
+    // These HashSets will store the locations of resource gameobjects
+    // HashSets are used over lists so that the same resource can't be added twice
     public HashSet<Vector3> FoodLocations;
     public HashSet<Vector3> WaterLocations;
     public HashSet<Vector3> WoodLocations;
@@ -79,17 +81,28 @@ public class AgentPerception : MonoBehaviour
         {
             foreach (RaycastHit hit in Hits)
             {
+                // Check the tag of the hit gameobject
                 if (hit.transform.tag == "Food")
                 {
+                    // If we hit a Food object, find its Interaction Target and add its position to the hash set
                     Vector3 InteractionTarget = hit.transform.Find("InteractionTarget").position;
 
                     FoodLocations.Add(InteractionTarget);
                 }
                 else if (hit.transform.tag == "Water")
                 {
-                    Vector3 InteractionTarget = hit.transform.Find("InteractionTarget").position;
+                    // Water objects are a special case - they have multiple Interaction Targets, one either side of the riverbank
+                    // This is so that agents don't get stuck
+                    // We have to add each of these to the WaterLocations hash set
+                    //Vector3 InteractionTarget = hit.transform.Find("InteractionTarget").position;
 
-                    WaterLocations.Add(InteractionTarget);
+                    foreach (Transform child in hit.transform)
+                    {
+                        if (child.name == "InteractionTarget")
+                        {
+                            WaterLocations.Add(child.transform.position);
+                        }
+                    }
                 }
                 else if (hit.transform.tag == "Wood")
                 {
