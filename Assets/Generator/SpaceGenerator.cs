@@ -25,8 +25,6 @@ public class SpaceGenerator
         // To do this we will traverse the graph (using each SPNode's ChildrenNodeList) to find the leaves
         List<RoomSPNode> DividedSpaces = GraphHelper.ExtractLeavesFromGraph(bsp.RootRoomNode);
 
-        //RoomGenerator roomGenerator = new RoomGenerator(MaxIterations, RoomWidthMin, RoomLengthMin);
-        //List<RoomSPNode> RoomList = roomGenerator.GenerateRooms(DividedSpaces);
         return new List<RoomSPNode>(DividedSpaces);
     }
 }
