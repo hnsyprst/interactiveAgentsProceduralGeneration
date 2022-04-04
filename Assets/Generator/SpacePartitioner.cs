@@ -7,7 +7,6 @@ public class SpacePartitioner : MonoBehaviour
     public int MapWidth, MapLength;
     public int RoomWidthMin, RoomLengthMin;
     public int MaxIterations;
-    public int CorridorWidth;
 
     List<RoomSPNode> RoomList = new List<RoomSPNode>();
 
@@ -15,32 +14,22 @@ public class SpacePartitioner : MonoBehaviour
 
     public bool DisplayGizmos = true;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        //PartitionSpace();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public List<RoomSPNode> PartitionSpace()
     {
+        // Partition the map size given by MapWidth and MapLength using SpaceGenerator
         SpaceGenerator Generator = new SpaceGenerator(MapWidth, MapLength);
         RoomList = Generator.CalculateRooms(MaxIterations, RoomWidthMin, RoomLengthMin);
+        // For each generated room, generate a new colour to display it in for debug
         for (int i = 0; i < RoomList.Count; i++)
         {
             Colors.Add(Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f));
         }
-
         return RoomList;
     }
 
     public Vector3 GetRoomCentre(RoomSPNode Room)
     {
+        // Calculate the centre point of the given room
         float CentreX = (Room.BottomLeftAreaCorner.x + Room.BottomRightAreaCorner.x) / 2;
         float CentreY = (Room.TopLeftAreaCorner.y + Room.BottomLeftAreaCorner.y) / 2;
         Vector3 CentrePoint = new Vector3(CentreX, 0, CentreY);
@@ -53,9 +42,8 @@ public class SpacePartitioner : MonoBehaviour
 
     public Vector3 GetRoomSize(RoomSPNode Room)
     {
-        float LengthX = Room.BottomRightAreaCorner.x - Room.BottomLeftAreaCorner.x;
-        float LengthY = Room.TopLeftAreaCorner.y - Room.BottomLeftAreaCorner.y;
-        Vector3 Size = new Vector3(LengthX, 0, LengthY);
+        // Get the size of the given room
+        Vector3 Size = new Vector3(Room.Width, 0, Room.Length);
 
         return Size;
     }

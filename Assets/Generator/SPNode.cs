@@ -4,8 +4,6 @@ using UnityEngine;
 
 public abstract class SPNode
 {
-    public bool Visited;
-
     public Vector2 BottomLeftAreaCorner;
     public Vector2 BottomRightAreaCorner;
     public Vector2 TopLeftAreaCorner;
@@ -27,6 +25,7 @@ public abstract class SPNode
 
     public SPNode(SPNode _ParentNode)
     {
+        // When this node gets created, add this node to its parents' list of children
         MyChildrenNodeList = new List<SPNode>();
         ParentNode = _ParentNode;
 
@@ -39,10 +38,5 @@ public abstract class SPNode
     public void AddChild(SPNode Child)
     {
         MyChildrenNodeList.Add(Child);
-    }
-
-    public void RemoveChild(SPNode Child)
-    {
-        MyChildrenNodeList.Remove(Child);
     }
 }

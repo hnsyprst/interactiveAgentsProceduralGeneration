@@ -13276,6 +13276,9 @@ MonoBehaviour:
   tiles:
   - {fileID: 1942928753}
   - {fileID: 454391779}
+  - {fileID: 234937660}
+  - {fileID: 897312118}
+  - {fileID: 40436382}
   invertArea: 0
   volumeType: 0
 --- !u!4 &364687802
@@ -43364,8 +43367,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60ae67b889f330f4d9f5656b51f9305c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CircleDistance: 1
-  CircleRadius: 0.5
+  CircleDistance: 1.5
+  CircleRadius: 0.25
 --- !u!114 &1042765926
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -75301,8 +75304,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60ae67b889f330f4d9f5656b51f9305c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CircleDistance: 1
-  CircleRadius: 0.5
+  CircleDistance: 1.5
+  CircleRadius: 0.25
 --- !u!114 &1853668171
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -76676,8 +76679,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60ae67b889f330f4d9f5656b51f9305c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CircleDistance: 1
-  CircleRadius: 0.5
+  CircleDistance: 1.5
+  CircleRadius: 0.25
 --- !u!114 &1872019882
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -82985,7 +82988,7 @@ MonoBehaviour:
   RoomWidthMin: 10
   RoomLengthMin: 10
   MaxIterations: 3
-  CorridorWidth: 0
+  DisplayGizmos: 1
 --- !u!114 &2005987434
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -82998,6 +83001,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1e1d739b791a8f49b4013534f66dcea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DisplayGizmos: 1
   MapSpacePartitioner: {fileID: 0}
   PathfindingGameObject: {fileID: 476164392}
   PathfindingGrid: {fileID: 0}
@@ -83006,7 +83010,7 @@ MonoBehaviour:
   - tile: {fileID: 454391779}
     weight: 10
   - tile: {fileID: 1526676152}
-    weight: 1
+    weight: 5
   - tile: {fileID: 1820563939}
     weight: 5
   - tile: {fileID: 618836753}
@@ -83024,12 +83028,12 @@ MonoBehaviour:
   - tile: {fileID: 234937660}
     weight: 0.1
   - tile: {fileID: 40436382}
-    weight: 0.1
+    weight: 0.05
   WaterAreaTiles:
   - tile: {fileID: 454391779}
     weight: 10
   - tile: {fileID: 1526676152}
-    weight: 2
+    weight: 5
   - tile: {fileID: 1820563939}
     weight: 0.1
   - tile: {fileID: 618836753}
@@ -83045,14 +83049,14 @@ MonoBehaviour:
   - tile: {fileID: 234937660}
     weight: 5
   - tile: {fileID: 40436382}
-    weight: 1
+    weight: 0.05
   - tile: {fileID: 1942928753}
     weight: 0
   TreesAreaTiles:
   - tile: {fileID: 454391779}
     weight: 10
   - tile: {fileID: 1526676152}
-    weight: 5
+    weight: 10
   - tile: {fileID: 1820563939}
     weight: 0.1
   - tile: {fileID: 618836753}
@@ -83070,12 +83074,12 @@ MonoBehaviour:
   - tile: {fileID: 234937660}
     weight: 0.1
   - tile: {fileID: 40436382}
-    weight: 0.1
+    weight: 0.05
   RuinsAreaTiles:
   - tile: {fileID: 454391779}
     weight: 10
   - tile: {fileID: 1526676152}
-    weight: 0.5
+    weight: 5
   - tile: {fileID: 1820563939}
     weight: 0.5
   - tile: {fileID: 618836753}
@@ -83091,7 +83095,7 @@ MonoBehaviour:
   - tile: {fileID: 234937660}
     weight: 0.1
   - tile: {fileID: 40436382}
-    weight: 0.1
+    weight: 0.05
   - tile: {fileID: 1942928753}
     weight: 0
 --- !u!65 &2005987435
@@ -83123,6 +83127,9 @@ MonoBehaviour:
   tiles:
   - {fileID: 1942928753}
   - {fileID: 454391779}
+  - {fileID: 897312118}
+  - {fileID: 234937660}
+  - {fileID: 40436382}
   invertArea: 0
   volumeType: 0
 --- !u!1 &2009157371

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class RoomSPNode : SPNode
 {
+    // Make it easy to get the width of this room later on
     public float Width
     {
         get
@@ -12,6 +13,7 @@ public class RoomSPNode : SPNode
         }
     }
 
+    // Make it easy to get the length of this room later on
     public float Length
     {
         get
