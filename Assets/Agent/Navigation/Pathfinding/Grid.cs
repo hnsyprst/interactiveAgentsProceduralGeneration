@@ -32,11 +32,11 @@ public class Grid : MonoBehaviour
         // Calculate number of nodes that can fit inside the specified grid size along the Y axis
         GridSizeY = Mathf.RoundToInt(GridWorldSize.y / NodeDiameter);
 
-        CreateGrid();
+        //CreateGrid();
     }
 
     // Populate the grid of nodes
-    void CreateGrid()
+    public void CreateGrid()
     {
         // Initialise the grid of nodes with the number of nodes calculated in Start()
         NodeGrid = new PFNode[GridSizeX, GridSizeY];

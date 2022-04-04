@@ -25,7 +25,6 @@ public class UIBarks : ScriptableObject
         foreach (var bark in BarkList)
         {
             BarkDict[bark.BarkName] = bark.EmojiNumber;
-            Debug.Log(BarkDict[bark.BarkName]);
         }
     }
 }
