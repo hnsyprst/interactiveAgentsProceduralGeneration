@@ -48,11 +48,25 @@ public class AgentStatus : MonoBehaviour
 
     public void Eat(float FoodValue)
     {
-        Hunger -= FoodValue;
+        if (Hunger - FoodValue <= 0)
+        {
+            Hunger = 0;
+        }
+        else
+        {
+            Hunger -= FoodValue;
+        }
     }
 
     public void Drink(float DrinkValue)
     {
-        Thirst -= DrinkValue;
+        if (Thirst - DrinkValue <= 0)
+        {
+            Thirst = 0;
+        }
+        else
+        {
+            Thirst -= DrinkValue;
+        }
     }
 }
