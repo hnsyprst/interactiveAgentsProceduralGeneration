@@ -113,12 +113,12 @@ public class Pathfinding : MonoBehaviour
             CurrentNode = CurrentNode.Parent;
         }
 
-        Vector3[] Waypoints = SimplifyPath(Path);
+        Vector3[] Waypoints = SimplifyPath(Path, _TargetNode);
         Array.Reverse(Waypoints);
         return Waypoints;
     }
 
-    Vector3[] SimplifyPath(List<PFNode> Path)
+    Vector3[] SimplifyPath(List<PFNode> Path, PFNode TargetNode)
     {
         List<Vector3> Waypoints = new List<Vector3>();
         Vector2 DirectionOld = Vector2.zero;
@@ -135,6 +135,12 @@ public class Pathfinding : MonoBehaviour
             }
             DirectionOld = DirectionNew;
         }
+
+        if (Waypoints.Count < 1)
+        {
+            Waypoints.Add(TargetNode.WorldPos + new Vector3(0, 1, 0));
+        }
+
         return Waypoints.ToArray();
     }
 

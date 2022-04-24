@@ -8,7 +8,7 @@ public class AgentBT : MonoBehaviour
 {
     // Reference to agent's path request and following script
     public GetPathAndFollow AgentPathfinding;
-    public Steer AgentSteering;
+    //public Steer AgentSteering;
 
     // Reference to agent's status (hunger, thirst)
     public AgentStatus CurrentAgentStatus;
@@ -19,8 +19,13 @@ public class AgentBT : MonoBehaviour
     // Reference to agent's perception script
     public AgentPerception CurrentAgentPerception;
 
-    // References to lists of interactable objects in the world
+    public Bounds MapBounds; 
+
+    // Lists of interactable objects in the world
     HashSet<Vector3> FoodLocations, WaterLocations, WoodLocations;
+
+    // A location the player has clicked
+    Vector3 PlayerClickLocation = Vector3.zero;
 
     Root bt_Tree;
     Blackboard bt_Blackboard;
@@ -30,6 +35,7 @@ public class AgentBT : MonoBehaviour
     const int AGENT_DRINK = 1;
     const int AGENT_EAT = 2;
     const int AGENT_CHOP_WOOD = 3;
+    const int PLAYER_CLICKED = 4;
 
     int CurrentAction;
     public List<float> UtilityScores;
@@ -40,7 +46,7 @@ public class AgentBT : MonoBehaviour
     void Start()
     {
         AgentPathfinding = GetComponent<GetPathAndFollow>();
-        AgentSteering = GetComponent<Steer>();
+        //AgentSteering = GetComponent<Steer>();
         CurrentAgentStatus = GetComponent<AgentStatus>();
         CurrentAgentCommunicate = GetComponentInChildren<AgentCommunicate>();
         CurrentAgentPerception = GetComponentInChildren<AgentPerception>();
@@ -55,6 +61,13 @@ public class AgentBT : MonoBehaviour
         UtilityScores.Add(0); // AGENT_DRINK
         UtilityScores.Add(0); // AGENT_EAT
         UtilityScores.Add(0); // AGENT_CHOP_WOOD
+        UtilityScores.Add(0); // PLAYER_CLICKED
+    }
+
+    public void MouseClicked(Vector3 Position)
+    {
+        UtilityScores[PLAYER_CLICKED] = 100;
+        PlayerClickLocation = Position;
     }
 
     // Update is called once per frame
@@ -71,6 +84,20 @@ public class AgentBT : MonoBehaviour
             CurrentAction = maxIndex;
             SwitchTree(SelectBehaviourTree(CurrentAction));
         }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireCube(MapBounds.center, MapBounds.size);
+    }
+
+    Vector3 GetRandomMapPosition()
+    {
+        return new Vector3(
+            UnityEngine.Random.Range(MapBounds.min.x, MapBounds.max.x),
+            0,
+            UnityEngine.Random.Range(MapBounds.min.z, MapBounds.max.z));
     }
 
     void UpdateScores()
@@ -144,6 +171,9 @@ public class AgentBT : MonoBehaviour
             case AGENT_CHOP_WOOD:
                 return GoToWoodAndChop();
 
+            case PLAYER_CLICKED:
+                return GoToClickLocation();
+
             default:
                 return Idle();
         }
@@ -160,19 +190,29 @@ public class AgentBT : MonoBehaviour
         AgentPathfinding.RequestPath(TargetPos);
     }
 
-    void StartWander()
+    /*void StartWander()
     {
-        AgentSteering.SetWander = true;
+        //AgentSteering.SetWander = true;
     }
 
     void StopWander()
     {
         AgentSteering.SetWander = false;
-    }
+    }*/
 
     bool JustReturnFalse()
     {
         return false;
+    }
+
+    bool JustReturnTrue()
+    {
+        return true;
+    }
+
+    void ResetPlayerClick()
+    {
+        UtilityScores[PLAYER_CLICKED] = 0;
     }
 
     /*********************************************
@@ -183,7 +223,7 @@ public class AgentBT : MonoBehaviour
 
     Root Idle()
     {
-        return new Root(new Action(() => StartWander()));
+        return new Root(new Action(() => JustReturnFalse()));
     }
 
     // If agent knows the location of a water source, go to it and drink
@@ -196,17 +236,25 @@ public class AgentBT : MonoBehaviour
                         WanderForWater()));
     }
 
-    Node WanderForWater()
+    /*Node WanderForWater()
     {
         return new Sequence(
                     new Action(() => CurrentAgentCommunicate.UIBark("Water", "Where")),
                     new Action(() => StartWander()));
+    }*/
+
+    Node WanderForWater()
+    {
+        return new Condition(() => !IsFollowingPath,
+                new Sequence(
+                    new Action(() => CurrentAgentCommunicate.UIBark("Water", "Where")),
+                    new Action(() => NavigateTo(GetRandomMapPosition()))));
     }
 
     Node GoToWaterAndDrink()
     {
         return new Sequence(
-                    new Action(() => StopWander()),
+                    //new Action(() => StopWander()),
                     new Action(() => Debug.Log("Navigating to water")),
                     new Action(() => NavigateTo(GetClosest(WaterLocations))),
                     new Action(() => Debug.Log(GetClosest(WaterLocations))),
@@ -224,23 +272,32 @@ public class AgentBT : MonoBehaviour
     // Otherwise wander until the agent finds it
     Root SeekFood()
     {
+        Debug.Log("SeekFood()");
         return new Root(new Selector(
                         new Condition(() => FoodLocations.Count > 0, Stops.IMMEDIATE_RESTART,
                         GoToFoodAndEat()),
                         WanderForFood()));
     }
 
-    Node WanderForFood()
+    /*Node WanderForFood()
     {
         return new Sequence(
                     new Action(() => CurrentAgentCommunicate.UIBark("Food", "Where")),
                     new Action(() => StartWander()));
+    }*/
+
+    Node WanderForFood()
+    {
+        return new Condition(() => !IsFollowingPath,
+                new Sequence(
+                    new Action(() => CurrentAgentCommunicate.UIBark("Food", "Where")),
+                    new Action(() => NavigateTo(GetRandomMapPosition()))));   
     }
 
     Node GoToFoodAndEat()
     {
         return new Sequence(
-                    new Action(() => StopWander()),
+                    //new Action(() => StopWander()),
                     new Action(() => NavigateTo(GetClosest(FoodLocations))),
                     //new Action(() => Debug.Log(GetClosest(FoodLocations))),
                     new Action(() => CurrentAgentCommunicate.UIBark("Food")),
@@ -256,7 +313,7 @@ public class AgentBT : MonoBehaviour
     Root GoToWoodAndChop()
     {
         return new Root(new Sequence(
-                        new Action(() => StopWander()),
+                        //new Action(() => StopWander()),
                         new Action(() => NavigateTo(GetClosest(WoodLocations))),
                         new Action(() => Debug.Log(GetClosest(WoodLocations))),
                         new Action(() => CurrentAgentCommunicate.UIBark("Wood")),
@@ -267,5 +324,21 @@ public class AgentBT : MonoBehaviour
                                 new Wait(0.5f),
                                 new Action(() => CurrentAgentStatus.Eat(4.5f)))),
                         new WaitUntilStopped()));
+    }
+
+    Root GoToClickLocation()
+    {
+        return new Root(new Sequence(
+                    //new Action(() => StopWander()),
+                    new Action(() => Debug.Log("Navigating to player click location")),
+                    new Action(() => NavigateTo(PlayerClickLocation)),
+                    new Action(() => CurrentAgentCommunicate.UIBark("Where")),
+                    new Wait(1f),
+                    new WaitForCondition(() => !IsFollowingPath,
+                        new Sequence(
+                            new Action(() => CurrentAgentCommunicate.UIBarkStop()),
+                            new Action(() => ResetPlayerClick()),
+                            new Wait(0.5f),
+                    new WaitUntilStopped()))));
     }
 }

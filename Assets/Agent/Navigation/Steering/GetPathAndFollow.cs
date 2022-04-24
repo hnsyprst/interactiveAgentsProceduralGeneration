@@ -34,6 +34,7 @@ public class GetPathAndFollow : MonoBehaviour
             Path = NewPath;
 
             // Start following the new path
+            IsFollowingPath = true;
             StartCoroutine("FollowPath");
         }
     }
@@ -47,7 +48,6 @@ public class GetPathAndFollow : MonoBehaviour
     IEnumerator FollowPath()
     {
         Vector3 CurrentWaypoint = Path[0];
-        IsFollowingPath = true;
 
         while (true)
         {
@@ -80,12 +80,12 @@ public class GetPathAndFollow : MonoBehaviour
             for (int i = TargetIndex; i < Path.Length; i++)
             {
                 Gizmos.color = Color.cyan;
-                Vector3 onezeroone = new Vector3(1, 0.01f, 1);
+                Vector3 onezeroone = new Vector3(1, 1f, 1);
                 Gizmos.DrawCube(Path[i], onezeroone);
 
                 if (i == TargetIndex)
                 {
-                    Gizmos.DrawLine(transform.position, Path[i]);
+                    Gizmos.DrawLine(transform.position + new Vector3(0, 2, 0), Path[i]);
                 }
                 else
                 {
