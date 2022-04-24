@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Steer : MonoBehaviour
 {
+    public Rigidbody RB;
     public bool SetWander = false;
     public Wander WanderScript;
     public float MovementSpeed = 0.1f;
@@ -19,10 +20,11 @@ public class Steer : MonoBehaviour
         WanderForce = Vector3.zero;
 
         WanderScript = GetComponent<Wander>();
+        RB = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         if (SetWander)
         {
