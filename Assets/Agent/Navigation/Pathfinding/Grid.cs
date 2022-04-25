@@ -5,7 +5,6 @@ using UnityEngine;
 public class Grid : MonoBehaviour
 {
     public bool DisplayDebugGrid;
-    public Transform Player;
     public Vector2 GridWorldSize;
     public float NodeRadius;
     public LayerMask UnwalkableMask;
@@ -124,17 +123,12 @@ public class Grid : MonoBehaviour
         // If NodeGrid has actually been populated
         if (NodeGrid != null && DisplayDebugGrid)
         {
-            // Draw gizmos for the pathfinding agents
-            PFNode PlayerNode = GetNodeFromWorldPos(Player.position);
-
             // Draw gizmos for each node in the grid of nodes
             foreach (PFNode node in NodeGrid)
             {
                 Color DrawColor = new Color();
                 // If the node is walkable, draw it in white, otherwise draw it in red
                 DrawColor = node.IsWalkable ? Color.white : Color.red;
-                // If the node is where a pathfinding agent is standing, draw it in blue
-                if (node == PlayerNode) DrawColor = Color.blue;
 
                 DrawColor.a = 0.5f;
                 Gizmos.color = DrawColor;

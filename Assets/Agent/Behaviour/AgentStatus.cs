@@ -4,13 +4,6 @@ using UnityEngine;
 
 public class AgentStatus : MonoBehaviour
 {
-    // Animation curves are used here to enable more interesting changes to agent status
-    // For example, hunger might not change much when the agent is not very hungry
-    // But the agent's hunger could start to increase more rapidly after a certain point
-    // This allows for the agent to not care so much about eating after it has just eaten
-    public AnimationCurve HungerIncreasePerSecond;
-    public AnimationCurve ThirstIncreasePerSecond;
-
     public float IncreasePerSecond = 0.01f;
 
     public float Hunger;
