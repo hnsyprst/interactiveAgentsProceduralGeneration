@@ -16,15 +16,15 @@ For performance, Pathfinding is accessed via [Assets/Agent/Navigation/Pathfindin
 ### Behaviour
 Person Agents each use a utility-based behaviour tree system for decision making. The behaviour trees are created using NPBehave. [Assets/Agent/Navigation/Behaviour/AgentBT.cs](https://github.com/hnsyprst/interactiveAgentsProceduralGeneration/blob/main/Assets/Agent/Navigation/Behaviour/AgentBT.cs) implements five behaviour trees:
 
- 1. AGENT_IDLE
+ 1. **AGENT_IDLE**
 	 - Currently, this behaviour tree simply returns false, meaning that the agent will just stand still. In future, this tree could be updated to implement more interesting idling behaviour.
- 2. AGENT_DRINK
+ 2. **AGENT_DRINK**
 	 - Activates the SeekWater() Root node, which causes the agent to choose random locations to navigate to (calling PathRequestManager to generate paths) until or unless a water source has been found. Once a water source has been found, the agent will navigate to the source and call it's Drink() action once it has arrived, lowering the agent's Thirst (and thus the utility of AGENT_DRINK).
- 3. AGENT_EAT
+ 3. **AGENT_EAT**
 	 - Activates the SeekFood() Root node, which causes the agent to choose random locations to navigate to (calling PathRequestManager to generate paths) until or unless a food source has been found. Once a food source has been found, the agent will navigate to the source and call it's Eat() action once it has arrived, lowering the agent's Hunger (and thus the utility of AGENT_EAT).
- 4. AGENT_CHOP_WOOD
+ 4. **AGENT_CHOP_WOOD**
 	 - Currently, this behaviour will cause the agent to choose random locations to navigate to (calling PathRequestManager to generate paths) until or unless a wood source has been found. Rather than chopping wood, however, the agent will call its Eat() action once it has arrived. In future, a behaviour should be implemented to allow the agent to gather wood from trees and return it to the building in the centre of the map.
- 5. PLAYER_CLICKED
+ 5. **PLAYER_CLICKED**
 	 - The player can interact with the Person Agents by clicking anywhere in the environment. This behaviour tree causes the agents to navigate to the clicked location, and reduces the utility of PLAYER_CLICKED once they have arrived, allowing the agents to return to their normal behaviour.
 
 Behaviour trees are switched between using a utility system. [Assets/Agent/Navigation/Behaviour/AgentStatus.cs](https://github.com/hnsyprst/interactiveAgentsProceduralGeneration/blob/main/Assets/Agent/Navigation/Behaviour/AgentStatus.cs) creates Hunger and Thirst variables, constantly increasing  the value of each over time. These variables are used by AgentBT to update the utility scores of the AGENT_DRINK and AGENT_EAT behaviour trees each frame---the behaviour tree with the highest value is then switched to. When the player interacts with the environment, a UnityEvent callback is invoked, which sets the utility of the PLAYER_CLICKED behaviour tree to 100, meaning that agents will always switch to this tree when the player clicks. Currently, the utility scores for AGENT_IDLE and AGENT_CHOP_WOOD are both set to 0, meaning these trees will never be switched to. In the future, agents hunger and thirst should not increase for a small amount of time after they have eaten or drunk, so that idle or wood chopping behaviours can be accessed.
@@ -63,12 +63,12 @@ Constraints are applied to the wave function collapse systems which force the pl
  - [Twemoji](https://twemoji.twitter.com/) emojis are used to communicate with the player
 
 # References
+Freehold Games, LLC (2015) _Caves of Qud_ [Video game]. Freehold Games, LLC.
+
+Game Maker's Toolkit (2017) _What Makes Good AI?_. 31 May. Available at: https://www.youtube.com/watch?v=9bbhJi0NBkk [Accessed: 25/04/2022].
+
 Lague, S. (2014) _A* Pathfinding Tutorial_. 16 December. Available at: https://www.youtube.com/watch?v=-L-WgKMFuhE&list=PLFt_AvWsXl0cq5Umv3pMC9SPnKjfp9eGW [Accessed: 25/04/2022].
 
 Reynolds, C. W. (1999) 'Steering Behaviors For Autonomous Characters', _Proceedings of Game Developers Conference 1999_, San Jose, California, 19 March. Pages 763-782. Available at: https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.86.636&rep=rep1&type=pdf [Accessed: 25/04/2022].
 
-Game Maker's Toolkit (2017) _What Makes Good AI?_. 31 May. Available at: https://www.youtube.com/watch?v=9bbhJi0NBkk [Accessed: 25/04/2022].
-
 Sunny Valley Studio (2019) _Unity 3d Procedural Dungeon Generator_. 18 November. Available at: https://www.youtube.com/watch?v=VnqN0v95jtU&list=PLcRSafycjWFfEPbSSjGMNY-goOZTuBPMW [Accessed: 25/04/2022].
-
-Freehold Games, LLC (2015) _Caves of Qud_ [Video game]. Freehold Games, LLC.
