@@ -3,7 +3,7 @@ This project implements an interactive technical demonstration of several game A
 ## Player Interaction
 To interact with the game, the player can click anywhere on the map that does not contain an obstacle. The Person Agents will use the pathfinding system to navigate to the clicked location; this can be used to help the Person Agents find food and water sources.
 ## Video Documentation
-[Click Here] (https://www.youtube.com/watch?v=mQWYU3pZ6PQ)
+[Click Here](https://www.youtube.com/watch?v=mQWYU3pZ6PQ)
 
 # Agents
 ## Person Agent
