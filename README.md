@@ -2,6 +2,8 @@
 This project implements an interactive technical demonstration of several game AI techniques in Unity. Two types of agents are created: a Person agent, which uses a utility-based behaviour tree system and A* pathfinding to seek and consume food and water; and a Duck agent, which uses steering behaviours to randomly roam the environment. Two procedural generation systems are built: a binary space partitioning system, which divides the map into themed chunks; and a wave function collapse system, which uses tiles to fill each chunk with relevant resources and decoration.
 ## Player Interaction
 To interact with the game, the player can click anywhere on the map that does not contain an obstacle. The Person Agents will use the pathfinding system to navigate to the clicked location; this can be used to help the Person Agents find food and water sources.
+## Video Documentation
+[Click Here] (https://www.youtube.com/watch?v=mQWYU3pZ6PQ)
 
 # Agents
 ## Person Agent
